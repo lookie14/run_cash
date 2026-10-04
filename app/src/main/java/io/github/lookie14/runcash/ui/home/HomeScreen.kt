@@ -104,6 +104,15 @@ fun HomeScreen(
                 color = if (state.goalReached) RunCashColors.Forest else RunCashColors.Ink,
             )
 
+            state.upcoming?.let { next ->
+                Text(
+                    text = "내일부터 목표가 ${formatNumber(next.goal)}걸음으로 바뀌어요\n(하루 최대 ${formatNumber(next.maxWon)}원)",
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    color = RunCashColors.Muted,
+                )
+            }
+
             AllowanceCard(state)
 
             if (onAddTestSteps != null) {
@@ -237,6 +246,23 @@ private fun AllowanceCard(state: HomeUiState) {
                 fontSize = 20.sp,
                 color = RunCashColors.Muted,
             )
+
+            state.lastMonth?.let { last ->
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    color = RunCashColors.Rule,
+                )
+                Text(
+                    text = if (last.paid) {
+                        "${last.month}월 용돈 ${formatNumber(last.won)}원을 받으셨어요"
+                    } else {
+                        "${last.month}월 용돈 ${formatNumber(last.won)}원은 곧 받으실 거예요"
+                    },
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (last.paid) RunCashColors.Forest else RunCashColors.Ink,
+                )
+            }
         }
     }
 }

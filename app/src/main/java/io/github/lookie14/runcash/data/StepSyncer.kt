@@ -33,6 +33,19 @@ class StepSyncer(
         }
     }
 
+    /** 백그라운드 작업용: 오늘 값과 지난 날짜를 한 번 올리고 끝난다. */
+    suspend fun syncOnce(familyId: String) {
+        try {
+            val day = steps.readTodaySteps()
+            push(familyId, day.date, day.steps)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // 읽기 실패. 지난 날짜 동기화는 그대로 시도한다.
+        }
+        syncPastDays(familyId)
+    }
+
     private suspend fun syncPastDays(familyId: String) {
         val today = LocalDate.now()
         val yesterday = today.minusDays(1)

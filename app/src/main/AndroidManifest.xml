@@ -4,6 +4,10 @@
 
     <!-- 걸음 수 읽기 권한 (Health Connect) -->
     <uses-permission android:name="android.permission.health.READ_STEPS" />
+    <!-- 앱이 꺼져 있을 때도 1시간마다 걸음 수를 읽어 올리기 위해 (지원하는 폰에서만) -->
+    <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" />
+    <!-- 손주 폰의 월말 정산 알림 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <queries>
         <package android:name="com.google.android.apps.healthdata" />

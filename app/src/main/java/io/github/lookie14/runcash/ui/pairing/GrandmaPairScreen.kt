@@ -41,7 +41,7 @@ import io.github.lookie14.runcash.ui.theme.RunCashColors
 
 private const val CODE_LENGTH = 6
 
-/** 할머니 폰: 손주 폰에 뜬 6자리 숫자를 입력해서 연결한다. */
+/** 사용자 폰: 관리자 폰에 뜬 6자리 숫자를 입력해서 연결한다. */
 @Composable
 fun GrandmaPairRoute(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
@@ -65,8 +65,8 @@ fun GrandmaPairRoute(onBack: () -> Unit) {
                     when (val result = AppContainer.familyRepository.claimPairCode(code)) {
                         is ClaimResult.Success -> AppContainer.sessionStore.setFamily(result.familyId)
                         ClaimResult.InvalidCode -> message = "숫자가 맞지 않아요.\n다시 확인해 주세요."
-                        ClaimResult.Expired -> message = "시간이 지났어요.\n손주 폰에서 새 숫자를 받아 주세요."
-                        ClaimResult.AlreadyPaired -> message = "이미 연결된 숫자예요.\n손주 폰에서 새 숫자를 받아 주세요."
+                        ClaimResult.Expired -> message = "시간이 지났어요.\n관리자 폰에서 새 숫자를 받아 주세요."
+                        ClaimResult.AlreadyPaired -> message = "이미 연결된 숫자예요.\n관리자 폰에서 새 숫자를 받아 주세요."
                     }
                 } catch (e: CancellationException) {
                     throw e
@@ -105,7 +105,7 @@ fun GrandmaPairScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
         ) {
             Text(
-                text = "손주 폰에 나온\n숫자 6개를 넣어 주세요",
+                text = "관리자 폰에 나온\n숫자 6개를 넣어 주세요",
                 fontSize = 30.sp,
                 fontWeight = FontWeight.ExtraBold,
                 textAlign = TextAlign.Center,

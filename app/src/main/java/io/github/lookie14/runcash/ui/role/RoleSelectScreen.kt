@@ -43,7 +43,7 @@ fun RoleSelectScreen(onSelect: (Role) -> Unit, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
         ) {
             Text(
-                text = "이 폰은 누구 폰인가요?",
+                text = "이 폰을 어떻게 쓸까요?",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.ExtraBold,
                 textAlign = TextAlign.Center,
@@ -56,7 +56,10 @@ fun RoleSelectScreen(onSelect: (Role) -> Unit, modifier: Modifier = Modifier) {
                     .heightIn(min = 100.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = RunCashColors.Forest),
             ) {
-                Text("할머니 폰", fontSize = 32.sp, fontWeight = FontWeight.Bold)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("사용자", fontSize = 32.sp, fontWeight = FontWeight.Bold)
+                    Text("걷고 용돈을 모아요", fontSize = 18.sp)
+                }
             }
             OutlinedButton(
                 onClick = { onSelect(Role.Grandson) },
@@ -64,7 +67,10 @@ fun RoleSelectScreen(onSelect: (Role) -> Unit, modifier: Modifier = Modifier) {
                     .fillMaxWidth()
                     .heightIn(min = 100.dp),
             ) {
-                Text("손주 폰", fontSize = 32.sp, fontWeight = FontWeight.Bold, color = RunCashColors.Forest)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("관리자", fontSize = 32.sp, fontWeight = FontWeight.Bold, color = RunCashColors.Forest)
+                    Text("기록을 보고 용돈을 보내요", fontSize = 18.sp, color = RunCashColors.Muted)
+                }
             }
         }
     }

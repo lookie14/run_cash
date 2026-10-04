@@ -21,6 +21,8 @@ class FakeStepRepository(
 
     override fun todayStepsWithDate(): Flow<DaySteps> = today.map { DaySteps(LocalDate.now(), it) }
 
+    override suspend fun readTodaySteps(): DaySteps = DaySteps(LocalDate.now(), today.value)
+
     fun addSteps(amount: Long) {
         today.update { it + amount }
     }

@@ -2,6 +2,7 @@ package io.github.lookie14.runcash.data
 
 import android.content.Context
 import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.HealthConnectFeatures
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.request.AggregateGroupByPeriodRequest
@@ -58,6 +59,37 @@ class HealthConnectStepRepository(private val context: Context) : StepRepository
             HealthStatus.Error
         }
 
+    /** 이 폰의 Health Connect가 백그라운드 읽기를 지원하는지. */
+    private fun backgroundReadSupported(): Boolean =
+        try {
+            client.features.getFeatureStatus(HealthConnectFeatures.FEATURE_READ_HEALTH_DATA_IN_BACKGROUND) ==
+                HealthConnectFeatures.FEATURE_STATUS_AVAILABLE
+        } catch (e: Exception) {
+            false
+        }
+
+    /** 허용 화면에서 요청할 권한. 지원하는 폰이면 백그라운드 읽기도 함께 요청한다. */
+    fun permissionsToRequest(): Set<String> =
+        if (backgroundReadSupported()) requiredPermissions + BACKGROUND_PERMISSION else requiredPermissions
+
+    /** 앱이 꺼져 있을 때도 읽을 수 있는지(지원 + 권한 허용). */
+    suspend fun canReadInBackground(): Boolean =
+        try {
+            backgroundReadSupported() &&
+                client.permissionController.getGrantedPermissions()
+                    .containsAll(requiredPermissions + BACKGROUND_PERMISSION)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            false
+        }
+
+    override suspend fun readTodaySteps(): DaySteps {
+        val now = LocalDateTime.now()
+        val date = now.toLocalDate()
+        return DaySteps(date, readSteps(date.atStartOfDay(), now))
+    }
+
     /** 일정 간격으로 다시 읽는다. 값에는 읽은 날짜가 붙어 있어서 자정이 지나도 날짜가 섞이지 않는다. */
     override fun todayStepsWithDate(): Flow<DaySteps> = flow {
         var last: DaySteps? = null
@@ -105,5 +137,6 @@ class HealthConnectStepRepository(private val context: Context) : StepRepository
 
     private companion object {
         const val POLL_MILLIS = 20_000L
+        val BACKGROUND_PERMISSION: String = HealthPermission.PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND
     }
 }

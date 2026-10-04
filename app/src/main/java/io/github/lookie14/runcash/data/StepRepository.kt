@@ -17,6 +17,9 @@ interface StepRepository {
     /** 오늘 걸음 수와 그 값을 읽은 날짜. 값이 바뀔 때마다 새로 내보낸다. */
     fun todayStepsWithDate(): Flow<DaySteps>
 
+    /** 지금 오늘 걸음 수를 한 번 읽는다. 실패하면 예외를 던진다. (백그라운드 업로드용) */
+    suspend fun readTodaySteps(): DaySteps
+
     /** 화면용: 오늘 걸음 수만. */
     fun todaySteps(): Flow<Long> = todayStepsWithDate().map { it.steps }
 

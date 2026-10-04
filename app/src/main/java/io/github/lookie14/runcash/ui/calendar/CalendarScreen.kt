@@ -93,7 +93,7 @@ fun CalendarScreen(
 }
 
 @Composable
-private fun MonthHeader(
+internal fun MonthHeader(
     month: YearMonth,
     canGoNext: Boolean,
     onPrevious: () -> Unit,
@@ -165,7 +165,7 @@ private fun SummaryItem(label: String, value: String, modifier: Modifier = Modif
 }
 
 @Composable
-private fun CalendarGrid(state: CalendarUiState, onSelect: (LocalDate) -> Unit) {
+internal fun CalendarGrid(state: CalendarUiState, onSelect: (LocalDate) -> Unit) {
     Surface(
         shape = RoundedCornerShape(24.dp),
         color = Color.White,
@@ -283,7 +283,7 @@ private fun DayCell(day: CalendarDay, selected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun DetailCard(state: CalendarUiState) {
+internal fun DetailCard(state: CalendarUiState) {
     Surface(
         shape = RoundedCornerShape(24.dp),
         color = Color.White,
@@ -316,7 +316,7 @@ private fun DetailCard(state: CalendarUiState) {
                     text = if (day.goalReached) {
                         "목표를 채웠어요!"
                     } else {
-                        "목표까지 ${formatNumber((state.dailyGoal - day.steps).coerceAtLeast(0))}걸음"
+                        "목표까지 ${formatNumber((day.goal - day.steps).coerceAtLeast(0))}걸음"
                     },
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,

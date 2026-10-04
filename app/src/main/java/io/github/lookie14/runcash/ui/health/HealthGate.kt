@@ -83,7 +83,8 @@ fun HealthGate(content: @Composable () -> Unit) {
             status = status,
             onGrant = {
                 try {
-                    permissionLauncher.launch(repository.requiredPermissions)
+                    // 지원하는 폰이면 백그라운드 읽기 권한도 같은 화면에서 함께 묻는다.
+                    permissionLauncher.launch(repository.permissionsToRequest())
                 } catch (e: Exception) {
                     status = HealthStatus.Error
                 }
