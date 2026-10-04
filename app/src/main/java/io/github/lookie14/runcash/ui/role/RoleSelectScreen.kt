@@ -11,7 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,40 +37,37 @@ fun RoleSelectScreen(onSelect: (Role) -> Unit, modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 28.dp, vertical = 32.dp),
+                .padding(horizontal = 28.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
         ) {
-            Text(
-                text = "이 폰을 어떻게 쓸까요?",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.ExtraBold,
-                textAlign = TextAlign.Center,
-                color = RunCashColors.Ink,
-            )
-            Button(
-                onClick = { onSelect(Role.Grandma) },
+            // 사용자(어르신)가 보는 화면이라 큰 버튼 하나만 크게 두고, 관리자 선택은 아래에 작게 둔다.
+            Column(
                 modifier = Modifier
+                    .weight(1f)
                     .fillMaxWidth()
-                    .heightIn(min = 100.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = RunCashColors.Forest),
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("사용자", fontSize = 32.sp, fontWeight = FontWeight.Bold)
-                    Text("걷고 용돈을 모아요", fontSize = 18.sp)
+                Text(
+                    text = "반가워요!",
+                    fontSize = 36.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    textAlign = TextAlign.Center,
+                    color = RunCashColors.Ink,
+                )
+                Button(
+                    onClick = { onSelect(Role.Grandma) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 100.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = RunCashColors.Forest),
+                ) {
+                    Text("시작하기", fontSize = 34.sp, fontWeight = FontWeight.Bold)
                 }
             }
-            OutlinedButton(
-                onClick = { onSelect(Role.Grandson) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 100.dp),
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("관리자", fontSize = 32.sp, fontWeight = FontWeight.Bold, color = RunCashColors.Forest)
-                    Text("기록을 보고 용돈을 보내요", fontSize = 18.sp, color = RunCashColors.Muted)
-                }
+            TextButton(onClick = { onSelect(Role.Grandson) }) {
+                Text("관리자로 시작하기", fontSize = 16.sp, color = RunCashColors.Muted)
             }
         }
     }

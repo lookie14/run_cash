@@ -7,6 +7,7 @@ import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.request.AggregateGroupByPeriodRequest
 import androidx.health.connect.client.request.AggregateRequest
+import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
@@ -87,8 +88,20 @@ class HealthConnectStepRepository(private val context: Context) : StepRepository
     override suspend fun readTodaySteps(): DaySteps {
         val now = LocalDateTime.now()
         val date = now.toLocalDate()
-        return DaySteps(date, readSteps(date.atStartOfDay(), now))
+        val start = date.atStartOfDay()
+        return DaySteps(date, readSteps(start, now), latestRecordEnd(start, now))
     }
+
+    /** 오늘 들어온 걸음 기록 중 가장 늦게 끝나는 시각. 기록이 없으면 null. */
+    private suspend fun latestRecordEnd(start: LocalDateTime, end: LocalDateTime): Long? =
+        client.readRecords(
+            ReadRecordsRequest(
+                recordType = StepsRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(start, end),
+                ascendingOrder = false,
+                pageSize = 1,
+            ),
+        ).records.firstOrNull()?.endTime?.toEpochMilli()
 
     /** 일정 간격으로 다시 읽는다. 값에는 읽은 날짜가 붙어 있어서 자정이 지나도 날짜가 섞이지 않는다. */
     override fun todayStepsWithDate(): Flow<DaySteps> = flow {
@@ -97,7 +110,8 @@ class HealthConnectStepRepository(private val context: Context) : StepRepository
             val now = LocalDateTime.now()
             val date = now.toLocalDate()
             val read = try {
-                DaySteps(date, readSteps(date.atStartOfDay(), now))
+                val start = date.atStartOfDay()
+                DaySteps(date, readSteps(start, now), latestRecordEnd(start, now))
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

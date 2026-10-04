@@ -5,8 +5,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 
-/** 어느 날짜의 걸음 수인지 함께 들고 다닌다. 자정 무렵 날짜가 섞이지 않게 하기 위해서다. */
-data class DaySteps(val date: LocalDate, val steps: Long)
+/**
+ * 어느 날짜의 걸음 수인지 함께 들고 다닌다. 자정 무렵 날짜가 섞이지 않게 하기 위해서다.
+ * coveredUntilMillis: 이 걸음 수에 포함된 마지막 기록의 끝 시각. 그 뒤에 걸은 걸음은 아직 안 들어와 있다.
+ *   (삼성헬스는 Health Connect로 몰아서 보내므로, 화면에서는 그 뒤를 폰 센서로 채운다) 모르면 null.
+ */
+data class DaySteps(val date: LocalDate, val steps: Long, val coveredUntilMillis: Long? = null)
 
 /**
  * 걸음 수를 가져오는 통로.

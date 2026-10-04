@@ -136,7 +136,7 @@ fun AdminSetupScreen(
                 onValueChange = onNameChange,
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text("내 이름") },
-                supportingText = { Text("다른 관리자에게 보이는 이름이에요 (예: 승현)") },
+                supportingText = { Text("다른 관리자에게 보이는 이름이에요") },
                 singleLine = true,
             )
 

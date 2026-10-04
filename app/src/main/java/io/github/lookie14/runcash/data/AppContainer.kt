@@ -8,7 +8,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.StateFlow
 import io.github.lookie14.runcash.domain.RuleSchedule
 import kotlinx.coroutines.flow.first
@@ -22,6 +27,7 @@ import io.github.lookie14.runcash.work.WorkScheduler
 object AppContainer {
     private var repository: StepRepository? = null
     private var store: SessionStore? = null
+    private var liveSensor: LiveStepSensor? = null
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var memberJob: Job? = null
     private var memberKey: String? = null
@@ -34,10 +40,46 @@ object AppContainer {
 
     val familyRepository: FamilyRepository by lazy { FamilyRepository() }
 
+    private var checker: HealthSetupChecker? = null
+
+    /** 사용자 폰 처음 설정 화면용 상태 확인. */
+    val setupChecker: HealthSetupChecker
+        get() = checkNotNull(checker) { "AppContainer.init(context)를 먼저 호출해야 한다" }
+
     private val _ruleSchedule = MutableStateFlow(RuleSchedule())
 
     /** 사용자 폰: 관리자가 정한 날짜별 목표/금액 규칙. 서버에서 받기 전에는 기본 규칙(5,000걸음/1,000원). */
     val ruleSchedule: StateFlow<RuleSchedule> = _ruleSchedule
+
+    /** 걸음 센서가 있는 폰인지. "신체 활동" 권한을 물을지 정할 때 쓴다. */
+    val hasStepSensor: Boolean get() = liveSensor?.isAvailable == true
+
+    /**
+     * 화면용 오늘 걸음: Health Connect 값 + 아직 Health Connect에 안 들어온 센서 걸음.
+     * 서버 업로드(용돈 계산)에는 쓰지 않는다. 업로드는 Health Connect 확정값만 쓴다.
+     * 센서는 앱이 화면으로 돌아올 때마다 다시 등록한다(권한을 막 허용한 경우 포함).
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun liveTodaySteps(): Flow<Long> {
+        val sensor = liveSensor ?: return stepRepository.todaySteps()
+        return channelFlow {
+            val log = SensorStepLog()
+            var latest: DaySteps? = null
+            fun publish() {
+                latest?.let { trySend(estimateTodaySteps(it, log)) }
+            }
+            launch {
+                resumeTick.flatMapLatest { sensor.increments() }.collect {
+                    log.add(it)
+                    publish()
+                }
+            }
+            stepRepository.todayStepsWithDate().collect {
+                latest = it
+                publish()
+            }
+        }.distinctUntilChanged()
+    }
 
     /** 앱이 화면으로 돌아올 때마다 올라간다. 걸음 수와 권한을 다시 확인하는 신호로 쓴다. */
     val resumeTick = MutableStateFlow(0)
@@ -47,6 +89,8 @@ object AppContainer {
         val app = context.applicationContext
         val debuggable = (app.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
         repository = if (debuggable) FakeStepRepository() else HealthConnectStepRepository(app)
+        liveSensor = LiveStepSensor(app)
+        checker = HealthSetupChecker(app)
         val sessionStore = SessionStore(app)
         store = sessionStore
 

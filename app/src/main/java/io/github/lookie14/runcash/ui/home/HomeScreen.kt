@@ -21,6 +21,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,6 +40,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.lookie14.runcash.ui.setup.LocalOpenSetup
 import io.github.lookie14.runcash.ui.theme.GrandmaTheme
 import io.github.lookie14.runcash.ui.theme.RunCashColors
 import java.text.NumberFormat
@@ -56,6 +58,7 @@ fun HomeRoute(viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Facto
     val state by viewModel.uiState.collectAsState()
     HomeScreen(
         state = state,
+        onOpenSetup = LocalOpenSetup.current,
         onAddTestSteps = if (viewModel.showTestControls) {
             { viewModel.addTestSteps() }
         } else {
@@ -68,6 +71,7 @@ fun HomeRoute(viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Facto
 fun HomeScreen(
     state: HomeUiState,
     onAddTestSteps: (() -> Unit)?,
+    onOpenSetup: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -123,6 +127,12 @@ fun HomeScreen(
                         .heightIn(min = 64.dp),
                 ) {
                     Text("테스트: 500걸음 추가", fontSize = 20.sp)
+                }
+            }
+
+            if (onOpenSetup != null) {
+                TextButton(onClick = onOpenSetup) {
+                    Text("설정 확인", fontSize = 16.sp, color = RunCashColors.Muted)
                 }
             }
         }

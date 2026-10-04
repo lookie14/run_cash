@@ -43,6 +43,13 @@ class SessionStore(context: Context) {
     /** 역할 선택부터 다시 시작한다. */
     fun reset() = save(Session())
 
+    /** 사용자 폰의 처음 설정(도우미)을 마쳤는지. */
+    var setupDone: Boolean
+        get() = prefs.getBoolean(KEY_SETUP_DONE, false)
+        set(value) {
+            prefs.edit().putBoolean(KEY_SETUP_DONE, value).apply()
+        }
+
     /** 지난 날짜 걸음 수를 이 날짜까지 서버에 다 올렸다. */
     var lastSyncedDate: LocalDate?
         get() = prefs.getString(KEY_LAST_SYNCED, null)?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
@@ -54,5 +61,6 @@ class SessionStore(context: Context) {
         const val KEY_ROLE = "role"
         const val KEY_FAMILY = "familyId"
         const val KEY_LAST_SYNCED = "lastSyncedDate"
+        const val KEY_SETUP_DONE = "setupDone"
     }
 }

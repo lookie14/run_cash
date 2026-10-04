@@ -96,6 +96,7 @@ private data class CalendarInputs(val month: YearMonth, val selected: LocalDate?
 @OptIn(ExperimentalCoroutinesApi::class)
 class CalendarViewModel(
     private val repository: StepRepository,
+    private val todaySteps: Flow<Long> = repository.todaySteps(),
     dateFlow: Flow<LocalDate> = currentDateFlow(),
     refresh: Flow<Int> = flowOf(0),
     schedule: Flow<RuleSchedule> = flowOf(RuleSchedule()),
@@ -126,7 +127,7 @@ class CalendarViewModel(
         combine(month, selectedDate, today) { m, s, t -> CalendarInputs(m, s, t) }
 
     val uiState: StateFlow<CalendarUiState> =
-        combine(inputs, loaded, repository.todaySteps(), rules) { input, loaded, todaySteps, schedule ->
+        combine(inputs, loaded, todaySteps, rules) { input, loaded, todaySteps, schedule ->
             val (month, selected, today) = input
             if (loaded == null || loaded.month != month || loaded.today != today) {
                 CalendarUiState(
@@ -165,6 +166,7 @@ class CalendarViewModel(
             initializer {
                 CalendarViewModel(
                     repository = AppContainer.stepRepository,
+                    todaySteps = AppContainer.liveTodaySteps(),
                     refresh = AppContainer.resumeTick,
                     schedule = AppContainer.ruleSchedule,
                 )

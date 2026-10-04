@@ -30,7 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.lookie14.runcash.ui.calendar.CalendarRoute
-import io.github.lookie14.runcash.ui.health.HealthGate
+import io.github.lookie14.runcash.ui.setup.SetupGate
 import io.github.lookie14.runcash.ui.home.HomeRoute
 import io.github.lookie14.runcash.ui.theme.RunCashColors
 
@@ -39,12 +39,13 @@ private val Tabs = listOf("오늘", "달력")
 /** 하단 큰 글씨 탭 2개: 오늘 / 달력. */
 @Composable
 fun RunCashApp() {
-    HealthGate { RunCashContent() }
+    SetupGate { RunCashContent() }
 }
 
 @Composable
 private fun RunCashContent() {
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,

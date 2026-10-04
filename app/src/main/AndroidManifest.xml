@@ -8,9 +8,16 @@
     <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" />
     <!-- 손주 폰의 월말 정산 알림 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- 처음 설정 화면에서 "배터리 절전 예외"를 한 번에 허용받기 위해 -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!-- 앱이 켜져 있는 동안 폰 걸음 센서로 걸음을 바로 반영 (안드로이드 10+) -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-feature android:name="android.hardware.sensor.stepcounter" android:required="false" />
 
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
+        <!-- 처음 설정 화면에서 삼성헬스가 설치돼 있는지 확인하고 바로 열기 위해 -->
+        <package android:name="com.sec.android.app.shealth" />
     </queries>
 
     <application

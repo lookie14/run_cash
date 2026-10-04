@@ -50,6 +50,8 @@ data class UpcomingRule(val goal: Int, val maxWon: Int)
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(
     private val repository: StepRepository,
+    /** 화면에 보여줄 오늘 걸음. 기본은 Health Connect 값, 앱에서는 센서로 보정한 값을 넘긴다. */
+    private val todaySteps: Flow<Long> = repository.todaySteps(),
     dateFlow: Flow<LocalDate> = currentDateFlow(),
     /** 값이 바뀔 때마다 지난 기록을 다시 읽는다. (앱이 화면으로 돌아올 때 등) */
     refresh: Flow<Int> = flowOf(0),
@@ -99,7 +101,7 @@ class HomeViewModel(
     val showTestControls: Boolean = repository.isFake
 
     val uiState: StateFlow<HomeUiState> =
-        combine(today, repository.todaySteps(), pastDays, lastMonth, rules) { date, todaySteps, past, last, schedule ->
+        combine(today, todaySteps, pastDays, lastMonth, rules) { date, todaySteps, past, last, schedule ->
             val todayRules = schedule.rulesOn(date)
             val tomorrowRules = schedule.rulesOn(date.plusDays(1))
             val upcoming = if (tomorrowRules != todayRules) {
@@ -147,6 +149,7 @@ class HomeViewModel(
             initializer {
                 HomeViewModel(
                     repository = AppContainer.stepRepository,
+                    todaySteps = AppContainer.liveTodaySteps(),
                     refresh = AppContainer.resumeTick,
                     settlementOf = { month ->
                         val familyId = AppContainer.sessionStore.session.value.familyId

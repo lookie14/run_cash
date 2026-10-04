@@ -1,0 +1,78 @@
+:root {
+  --forest: #1E6B45;
+  --gold: #D99A00;
+  --track: #DCE5DE;
+  --bg: #F2F6F3;
+  --passbook: #FFF3D1;
+  --rule: #E2CF9A;
+  --ink: #111;
+  --muted: #4A554E;
+  --danger: #B3261E;
+  --bar: #B7C7BC;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+.top {
+  display: flex; align-items: center; gap: 8px;
+  padding: calc(16px + env(safe-area-inset-top)) 16px 8px;
+}
+.top h1 { font-size: 22px; margin: 0; }
+.badge { font-size: 12px; background: var(--track); color: var(--forest); padding: 2px 8px; border-radius: 99px; }
+main { max-width: 560px; margin: 0 auto; padding: 8px 16px 40px; }
+.card { background: #fff; border-radius: 18px; padding: 18px; margin: 12px 0; }
+.card h2 { font-size: 17px; margin: 0 0 8px; }
+.passbook { background: var(--passbook); }
+.ok { background: #E3F1E8; }
+.warn { background: #FFE3DE; }
+.idle { background: #EDEDED; }
+.hidden { display: none !important; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.error { color: var(--danger); }
+.big { font-size: 34px; font-weight: 800; margin: 4px 0; }
+.title-ok { color: var(--forest); font-weight: 700; font-size: 18px; }
+.title-warn { color: var(--danger); font-weight: 700; font-size: 19px; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.stat .label { font-size: 13px; color: var(--muted); }
+.stat .value { font-size: 21px; font-weight: 700; color: var(--forest); }
+hr { border: 0; border-top: 1px solid var(--rule); margin: 10px 0; }
+label { display: block; margin: 10px 0; font-size: 14px; color: var(--muted); }
+input { display: block; width: 100%; margin-top: 4px; font-size: 18px; padding: 10px 12px; border: 1px solid #C9D3CC; border-radius: 10px; }
+button { font-size: 16px; border-radius: 10px; padding: 10px 14px; border: 1px solid var(--forest); background: #fff; color: var(--forest); }
+button.primary { width: 100%; background: var(--forest); color: #fff; font-size: 18px; padding: 12px; }
+button:disabled { opacity: .4; }
+
+/* 7일 막대 그래프 */
+.chart { position: relative; height: 150px; display: grid; grid-template-columns: repeat(7, 1fr); align-items: end; gap: 0; margin-top: 8px; }
+.chart .slot { display: flex; justify-content: center; align-items: end; height: 100%; }
+.chart .bar { width: 55%; border-radius: 6px 6px 0 0; background: var(--bar); min-height: 0; }
+.chart .bar.reached { background: var(--forest); }
+.chart .bar.today { background: var(--gold); }
+.chart .goal { position: absolute; left: 0; right: 0; border-top: 1.5px dashed rgba(0,0,0,.5); }
+.chart-labels { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 12px; margin-top: 4px; }
+.chart-labels .day { color: var(--muted); font-size: 13px; }
+
+/* 달력 */
+.cal-head { display: flex; align-items: center; justify-content: space-between; }
+.cal-head button { width: 48px; height: 48px; border-radius: 50%; border: 0; background: var(--bg); font-size: 18px; }
+.cal-head .m { font-size: 20px; font-weight: 700; }
+.grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-top: 8px; }
+.grid .wd { text-align: center; font-weight: 700; color: var(--muted); font-size: 14px; padding: 4px 0; }
+.grid .wd.sun { color: var(--danger); }
+.cell { aspect-ratio: .78; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; font-size: 12px; border: 2px solid transparent; background: transparent; padding: 0; color: var(--ink); }
+.cell .n { font-weight: 700; font-size: 15px; }
+.cell .s { color: var(--muted); font-size: 11px; }
+.cell.reached { background: var(--passbook); }
+.cell.today { border-color: var(--gold); }
+.cell.sel { border-color: var(--forest); }
+.cell.future { color: #9AA39D; }
+.stamp { width: 22px; height: 22px; border-radius: 50%; background: var(--forest); color: #fff; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+.stamp.empty { background: transparent; }
+.detail { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--track); }
+.row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
