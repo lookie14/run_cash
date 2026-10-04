@@ -233,7 +233,7 @@ private fun AllowanceCard(state: HomeUiState) {
                 color = RunCashColors.Ink,
             )
             Text(
-                text = "${formatNumber(state.monthPoints)}포인트, 월말에 손주가 보내드려요",
+                text = "월말에 지급돼요",
                 fontSize = 20.sp,
                 color = RunCashColors.Muted,
             )
@@ -249,9 +249,9 @@ private fun HomeScreenInProgressPreview() {
             state = HomeUiState(
                 date = LocalDate.of(2026, 10, 4),
                 todaySteps = 3_214,
-                todayPoints = 3,
-                monthPoints = 123,
-                todayWon = 300,
+                todayPoints = 642,
+                monthPoints = 12_300,
+                todayWon = 642,
                 monthWon = 12_300,
                 isLoading = false,
             ),
@@ -268,9 +268,9 @@ private fun HomeScreenGoalReachedPreview() {
             state = HomeUiState(
                 date = LocalDate.of(2026, 10, 4),
                 todaySteps = 6_480,
-                todayPoints = 9,
-                monthPoints = 129,
-                todayWon = 900,
+                todayPoints = 1_000,
+                monthPoints = 12_900,
+                todayWon = 1_000,
                 monthWon = 12_900,
                 isLoading = false,
             ),

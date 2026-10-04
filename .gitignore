@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Firebase 설정 파일 (저장소에 올리지 않음)
+app/google-services.json

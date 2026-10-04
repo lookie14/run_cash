@@ -2,7 +2,7 @@ package io.github.lookie14.runcash.data
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import java.time.LocalDate
 import kotlin.random.Random
@@ -19,22 +19,12 @@ class FakeStepRepository(
 
     override val isFake: Boolean = true
 
-    override fun todaySteps(): Flow<Long> = today.asStateFlow()
+    override fun todayStepsWithDate(): Flow<DaySteps> = today.map { DaySteps(LocalDate.now(), it) }
 
     fun addSteps(amount: Long) {
         today.update { it + amount }
     }
 
-    override suspend fun stepsBetween(
-        start: LocalDate,
-        endInclusive: LocalDate,
-    ): Map<LocalDate, Long> {
-        val result = linkedMapOf<LocalDate, Long>()
-        var date = start
-        while (!date.isAfter(endInclusive)) {
-            result[date] = Random(date.toEpochDay()).nextLong(1_500L, 9_000L)
-            date = date.plusDays(1)
-        }
-        return result
-    }
+    override suspend fun readStepsBetween(start: LocalDate, endInclusive: LocalDate): Map<LocalDate, Long> =
+        fillDays(start, endInclusive) { date -> Random(date.toEpochDay()).nextLong(1_500L, 9_000L) }
 }

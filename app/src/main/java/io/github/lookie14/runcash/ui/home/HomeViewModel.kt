@@ -4,16 +4,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import io.github.lookie14.runcash.data.AppContainer
 import io.github.lookie14.runcash.data.FakeStepRepository
 import io.github.lookie14.runcash.data.StepRepository
+import io.github.lookie14.runcash.data.currentDateFlow
 import io.github.lookie14.runcash.domain.PointCalculator
 import io.github.lookie14.runcash.domain.PointRules
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 data class HomeUiState(
@@ -31,37 +36,42 @@ data class HomeUiState(
     val progress: Float get() = (todaySteps.toFloat() / dailyGoal).coerceIn(0f, 1f)
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(
     private val repository: StepRepository,
     private val rules: PointRules = PointRules(),
-    private val today: LocalDate = LocalDate.now(),
+    dateFlow: Flow<LocalDate> = currentDateFlow(),
+    /** 값이 바뀔 때마다 지난 기록을 다시 읽는다. (앱이 화면으로 돌아올 때 등) */
+    refresh: Flow<Int> = flowOf(0),
 ) : ViewModel() {
 
     private val calculator = PointCalculator(rules)
 
-    /** 이번 달 1일부터 어제까지의 기록. 불러오기 전에는 null. */
-    private val pastDaysThisMonth = MutableStateFlow<Map<LocalDate, Long>?>(null)
+    /** 오늘 날짜. 자정이 지나면 저절로 바뀐다. */
+    private val today: StateFlow<LocalDate> =
+        dateFlow.stateIn(viewModelScope, SharingStarted.Eagerly, LocalDate.now())
+
+    /** 이번 달 1일부터 어제까지의 기록과 그 기준 날짜. 불러오기 전에는 null. */
+    private val pastDays: StateFlow<Pair<LocalDate, Map<LocalDate, Long>>?> =
+        combine(today, refresh) { date, _ -> date }
+            .flatMapLatest { date ->
+                flow {
+                    emit(date to repository.stepsBetween(date.withDayOfMonth(1), date.minusDays(1)))
+                }
+            }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val showTestControls: Boolean = repository.isFake
 
-    init {
-        viewModelScope.launch {
-            pastDaysThisMonth.value = repository.stepsBetween(
-                start = today.withDayOfMonth(1),
-                endInclusive = today.minusDays(1),
-            )
-        }
-    }
-
     val uiState: StateFlow<HomeUiState> =
-        combine(repository.todaySteps(), pastDaysThisMonth) { todaySteps, pastDays ->
-            if (pastDays == null) {
-                HomeUiState(date = today, dailyGoal = rules.dailyGoal, todaySteps = todaySteps)
+        combine(today, repository.todaySteps(), pastDays) { date, todaySteps, past ->
+            if (past == null || past.first != date) {
+                HomeUiState(date = date, dailyGoal = rules.dailyGoal, todaySteps = todaySteps)
             } else {
                 val todayPoints = calculator.pointsForDay(todaySteps)
-                val monthPoints = calculator.pointsForPeriod(pastDays + (today to todaySteps))
+                val monthPoints = calculator.pointsForPeriod(past.second + (date to todaySteps))
                 HomeUiState(
-                    date = today,
+                    date = date,
                     todaySteps = todaySteps,
                     dailyGoal = rules.dailyGoal,
                     todayPoints = todayPoints,
@@ -74,7 +84,7 @@ class HomeViewModel(
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = HomeUiState(date = today, dailyGoal = rules.dailyGoal),
+            initialValue = HomeUiState(date = today.value, dailyGoal = rules.dailyGoal),
         )
 
     fun addTestSteps(amount: Long = 500L) {
@@ -82,9 +92,13 @@ class HomeViewModel(
     }
 
     companion object {
-        // Health Connect 구현이 준비되면 여기만 바꾸면 된다.
         val Factory = viewModelFactory {
-            initializer { HomeViewModel(FakeStepRepository()) }
+            initializer {
+                HomeViewModel(
+                    repository = AppContainer.stepRepository,
+                    refresh = AppContainer.resumeTick,
+                )
+            }
         }
     }
 }
